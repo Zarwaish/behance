@@ -270,8 +270,8 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl">
-      <div className="space-y-6 bg-[#050814]/40 border border-white/5 relative p-8 shadow-[0_0_30px_rgba(34,211,238,0.02)]">
+    <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 w-full max-w-3xl">
+      <div className="space-y-5 sm:space-y-6 bg-[#050814]/40 border border-white/5 relative p-4 sm:p-8 shadow-[0_0_30px_rgba(34,211,238,0.02)]">
         {/* Corner Accents */}
         <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[var(--glow-cyan)]/20" />
         <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[var(--glow-cyan)]/20" />
@@ -399,19 +399,19 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         </div>
 
         {/* ── Cover Image ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           <div>
             <label className="block text-[10px] uppercase tracking-[0.2em] text-[var(--glow-cyan)] mb-2 font-semibold">Primary Cover Image Link</label>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col xs:flex-row gap-2 sm:gap-4 items-stretch xs:items-center">
               <input
                 type="url"
                 value={formData.cover_image}
                 onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-                className="flex-1 px-4 py-3 bg-[#02040a]/60 border border-white/10 text-white focus:outline-none focus:border-[var(--glow-cyan)]/50 focus:ring-1 focus:ring-[var(--glow-cyan)]/20 transition-all font-sans text-sm"
+                className="flex-1 px-4 py-3 bg-[#02040a]/60 border border-white/10 text-white focus:outline-none focus:border-[var(--glow-cyan)]/50 focus:ring-1 focus:ring-[var(--glow-cyan)]/20 transition-all font-sans text-sm min-h-[44px]"
                 placeholder="https://..."
                 required
               />
-              <label className="px-4 py-3 border border-white/20 hover:border-[var(--glow-cyan)]/50 text-white text-[10px] uppercase tracking-wider bg-white/5 cursor-pointer transition-colors shrink-0">
+              <label className="flex items-center justify-center px-4 py-3 border border-white/20 hover:border-[var(--glow-cyan)]/50 text-white text-[10px] uppercase tracking-wider bg-white/5 cursor-pointer transition-colors shrink-0 min-h-[44px]">
                 {uploading ? "Uploading..." : "Upload"}
                 <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'cover')} className="hidden" disabled={uploading} />
               </label>
@@ -579,11 +579,11 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
       </div>
 
       {/* ── Actions ── */}
-      <div className="flex justify-end gap-6">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-6">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-8 py-4 bg-transparent border border-white/10 text-zinc-400 hover:text-white hover:border-white/20 text-xs uppercase tracking-[0.2em] rounded-none transition-all cursor-pointer"
+          className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-white/10 text-zinc-400 hover:text-white hover:border-white/20 text-xs uppercase tracking-[0.2em] rounded-none transition-all cursor-pointer min-h-[48px]"
           disabled={loading || uploading || uploadingVideo}
         >
           Retreat
@@ -591,7 +591,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         <button
           type="submit"
           disabled={loading || uploading || uploadingVideo}
-          className="group relative overflow-hidden flex items-center justify-center gap-2 px-8 py-4 bg-transparent border border-white/20 text-white text-xs uppercase tracking-[0.2em] transition-all hover:border-[var(--glow-cyan)]/50 cursor-pointer disabled:opacity-50"
+          className="group relative overflow-hidden w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-white/20 text-white text-xs uppercase tracking-[0.2em] transition-all hover:border-[var(--glow-cyan)]/50 cursor-pointer disabled:opacity-50 min-h-[48px]"
         >
           <span className="relative z-10">
             {loading ? "Cataloging..." : uploading ? "Uploading Images..." : uploadingVideo ? `Uploading Video ${videoUploadProgress}%...` : "Catalog Artifact"}
