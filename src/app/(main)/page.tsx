@@ -12,7 +12,7 @@ export default async function Home() {
   let latestProjects: any[] = []
   
   try {
-    const { data: latestData } = await supabase
+    const { data: latestData, error } = await supabase
       .from('projects')
       .select('*')
       .eq('status', 'published')
@@ -20,9 +20,12 @@ export default async function Home() {
       .order('created_at', { ascending: false })
       .limit(3)
 
+    if (error) {
+      console.error("Supabase query error on HomePage:", error)
+    }
     if (latestData) latestProjects = latestData
   } catch (e) {
-    // Fail silently
+    console.error("Exception fetching projects on HomePage:", e)
   }
 
   return (

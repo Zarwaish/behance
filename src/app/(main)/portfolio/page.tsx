@@ -13,14 +13,19 @@ export default async function PortfolioPage() {
   
   let projects = null;
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('projects')
       .select('*')
       .eq('status', 'published')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false })
+    if (error) {
+      console.error("Supabase query error on PortfolioPage:", error)
+    }
     projects = data;
-  } catch (err) {}
+  } catch (err) {
+    console.error("Exception fetching projects on PortfolioPage:", err)
+  }
 
   const displayProjects = projects || []
 
