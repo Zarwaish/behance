@@ -6,9 +6,19 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  const cleanUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const cleanKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+
+  console.log("Supabase Middleware Client Diagnostics:", {
+    hasUrl: !!cleanUrl,
+    urlValue: cleanUrl,
+    hasKey: !!cleanKey,
+    keyLength: cleanKey?.length || 0,
+  })
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    cleanUrl || "",
+    cleanKey || "",
     {
       cookies: {
         getAll() {
