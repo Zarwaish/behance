@@ -1,24 +1,23 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getSupabaseConfig } from './client'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
 
-  const cleanUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const cleanKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+  const { url, anonKey } = getSupabaseConfig()
 
   console.log("Supabase Middleware Client Diagnostics:", {
-    hasUrl: !!cleanUrl,
-    urlValue: cleanUrl,
-    hasKey: !!cleanKey,
-    keyLength: cleanKey?.length || 0,
+    urlValue: url,
+    hasKey: !!anonKey,
+    keyLength: anonKey.length,
   })
 
   const supabase = createServerClient(
-    cleanUrl || "",
-    cleanKey || "",
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {

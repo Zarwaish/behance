@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from '@supabase/ssr'
+import { getSupabaseConfig } from "@/lib/supabase/client"
 import { CATEGORIES } from "@/types"
 import { Upload, X, Video, Film } from "lucide-react"
 
@@ -58,10 +59,10 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
     }
   }, [initialData])
 
-  const getSupabase = () => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const getSupabase = () => {
+    const { url, anonKey } = getSupabaseConfig()
+    return createBrowserClient(url, anonKey)
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'cover' | 'gallery') => {
     const files = e.target.files
@@ -145,8 +146,9 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
       }
 
       // Use XMLHttpRequest for real upload progress tracking
-      const uploadUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/portfolio-videos/${filePath}`
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      const { url: configUrl, anonKey: configAnonKey } = getSupabaseConfig()
+      const uploadUrl = `${configUrl}/storage/v1/object/portfolio-videos/${filePath}`
+      const anonKey = configAnonKey
 
       // Get the user session token
       const { data: { session } } = await supabase.auth.getSession()
