@@ -20,10 +20,10 @@
 }
 
 html {
-  /* Prevent horizontal overflow at the root */
-  overflow-x: hidden;
   /* Smooth scroll for anchor links */
   scroll-behavior: smooth;
+  /* NOTE: Do NOT add overflow-x:hidden here — it clips position:fixed elements
+     on iOS Safari (e.g. mobile nav menu). Use body overflow instead. */
 }
 
 body {

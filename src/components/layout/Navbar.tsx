@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { cn } from "@/lib/utils"
@@ -19,7 +19,6 @@ export default function Navbar() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -30,187 +29,223 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Close mobile menu on route change
+  // Close menu on route change
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
-  // Track scroll for nav shadow
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
-
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    setIsOpen(false)
     router.push("/")
     router.refresh()
   }
 
   return (
-    <nav className={cn(
-      "fixed top-0 w-full z-50 transition-all duration-300",
-      "bg-background/80 backdrop-blur-md border-b border-white/5",
-      scrolled && "shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
-    )}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+    <>
+      {/* ── Navbar bar ── */}
+      <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-[#020308]/90 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
 
-          {/* Logo */}
-          <Link href="/" className="group relative text-lg sm:text-xl font-serif tracking-[0.2em] text-white uppercase flex-shrink-0">
-            <span>Aria Shadow</span>
-            <span className="text-[var(--glow-cyan)] font-sans">.</span>
-          </Link>
+            {/* Logo */}
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className="text-lg sm:text-xl font-serif tracking-[0.2em] text-white uppercase"
+            >
+              Aria Shadow<span className="text-[var(--glow-cyan)] font-sans">.</span>
+            </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={cn(
-                    "relative text-[11px] uppercase tracking-[0.2em] transition-all duration-300",
-                    isActive ? "text-[var(--glow-cyan)] font-medium" : "text-zinc-400 hover:text-white"
-                  )}
-                >
-                  {link.name}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-glow"
-                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[var(--glow-cyan)] rounded-full"
-                    />
-                  )}
-                </Link>
-              )
-            })}
+            {/* Desktop links */}
+            <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={cn(
+                      "relative text-[11px] uppercase tracking-[0.2em] transition-all duration-300",
+                      isActive ? "text-[var(--glow-cyan)] font-medium" : "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-glow"
+                        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[var(--glow-cyan)] rounded-full"
+                      />
+                    )}
+                  </Link>
+                )
+              })}
 
-            {user ? (
-              <div className="pl-4 border-l border-white/5 flex items-center gap-5">
-                <Link
-                  href="/admin"
-                  className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all duration-300"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="pl-4 border-l border-white/5">
+              {user ? (
+                <div className="pl-4 border-l border-white/5 flex items-center gap-5">
+                  <Link href="/admin" className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all">
+                    Dashboard
+                  </Link>
+                  <button onClick={handleLogout} className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer">
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="pl-4 border-l border-white/5">
+                  <Link href="/login" className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-[10px] uppercase tracking-[0.2em] transition-all">
+                    Login
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden flex items-center justify-center w-11 h-11 text-zinc-300 hover:text-[var(--glow-cyan)] transition-colors"
+              onClick={() => setIsOpen(prev => !prev)}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+            >
+              {isOpen
+                ? <X size={22} strokeWidth={1.5} />
+                : <Menu size={22} strokeWidth={1.5} />
+              }
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Mobile menu — rendered OUTSIDE the nav, as a separate fixed panel ── */}
+      {/* Using a plain div with inline style so no CSS class issues can hide it */}
+      {isOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '64px',   /* matches h-16 */
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            backgroundColor: 'rgba(2, 3, 8, 0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            overflowY: 'auto',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '32px 24px 48px' }}>
+
+            {/* Nav links */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '18px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      fontFamily: 'var(--font-playfair), serif',
+                      fontSize: '18px',
+                      fontWeight: 400,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      textDecoration: 'none',
+                      color: isActive ? 'var(--glow-cyan)' : '#d4d4d8',
+                    }}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <span style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--glow-cyan)',
+                        display: 'inline-block',
+                        flexShrink: 0,
+                      }} />
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* Auth section */}
+            <div style={{ marginTop: 'auto', paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {user ? (
+                <>
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '16px',
+                      border: '1px solid rgba(34,211,238,0.3)',
+                      backgroundColor: 'rgba(34,211,238,0.05)',
+                      color: 'var(--glow-cyan)',
+                      fontSize: '13px',
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase',
+                      textDecoration: 'none',
+                      fontFamily: 'var(--font-inter), sans-serif',
+                    }}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '16px',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      backgroundColor: 'transparent',
+                      color: '#a1a1aa',
+                      fontSize: '13px',
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-inter), sans-serif',
+                      width: '100%',
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
                 <Link
                   href="/login"
-                  className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 bg-transparent text-white text-[10px] uppercase tracking-[0.2em] transition-all duration-300"
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    textDecoration: 'none',
+                    fontFamily: 'var(--font-inter), sans-serif',
+                  }}
                 >
                   Login
                 </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Button — 44×44px touch target */}
-          <button
-            id="mobile-menu-toggle"
-            className="md:hidden flex items-center justify-center w-11 h-11 text-zinc-400 hover:text-[var(--glow-cyan)] transition-colors rounded-none border border-white/5 bg-white/2 active:bg-white/5"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isOpen}
-          >
-            {isOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Full-screen Overlay Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="md:hidden fixed inset-0 top-16 sm:top-20 z-40 bg-background/98 backdrop-blur-xl border-t border-white/5"
-          >
-            <div className="flex flex-col h-full overflow-y-auto">
-              {/* Nav Links */}
-              <div className="flex flex-col px-6 pt-8 pb-4 space-y-1">
-                {navLinks.map((link, i) => {
-                  const isActive = pathname === link.href
-                  return (
-                    <motion.div
-                      key={link.name}
-                      initial={{ opacity: 0, x: -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.07 }}
-                    >
-                      <Link
-                        href={link.href}
-                        onClick={() => setIsOpen(false)}
-                        className={cn(
-                          "flex items-center justify-between w-full py-4 border-b border-white/5",
-                          "text-base font-serif uppercase tracking-[0.2em] transition-colors",
-                          isActive ? "text-[var(--glow-cyan)]" : "text-zinc-300 hover:text-white"
-                        )}
-                      >
-                        {link.name}
-                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--glow-cyan)]" />}
-                      </Link>
-                    </motion.div>
-                  )
-                })}
-              </div>
-
-              {/* Auth Section */}
-              <div className="px-6 pt-4 pb-8 mt-auto">
-                <div className="border-t border-white/5 pt-6 space-y-4">
-                  {user ? (
-                    <>
-                      <Link
-                        href="/admin"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-center w-full py-4 border border-[var(--glow-cyan)]/30 bg-[var(--glow-cyan)]/5 text-[var(--glow-cyan)] text-sm uppercase tracking-[0.2em] transition-all"
-                      >
-                        Dashboard
-                      </Link>
-                      <button
-                        onClick={() => { setIsOpen(false); handleLogout() }}
-                        className="flex items-center justify-center w-full py-4 border border-white/10 text-zinc-400 hover:text-red-400 text-sm uppercase tracking-[0.2em] transition-colors cursor-pointer"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <Link
-                      href="/login"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-center w-full py-4 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-sm uppercase tracking-[0.2em] transition-all bg-white/5"
-                    >
-                      Login
-                    </Link>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
