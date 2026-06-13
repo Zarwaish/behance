@@ -4,12 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from '@/lib/supabase/client'
-import { LayoutDashboard, FolderKanban, LogOut, Globe, Menu, X } from "lucide-react"
+import { LayoutDashboard, FolderKanban, LogOut, Globe, Menu, X, Sliders } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Control Center", exact: true },
   { href: "/admin/projects", icon: FolderKanban, label: "Archives Registry", exact: false },
+  { href: "/admin/homepage", icon: Sliders, label: "Homepage Curation", exact: true },
   { href: "/", icon: Globe, label: "View Website", exact: true },
 ]
 
