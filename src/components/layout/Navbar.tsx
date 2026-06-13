@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
@@ -19,6 +19,20 @@ export default function Navbar() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const navRef = useRef<HTMLElement>(null)
+  const [navHeight, setNavHeight] = useState(64)
+
+  // Measure actual navbar height for mobile menu positioning
+  useEffect(() => {
+    const measure = () => {
+      if (navRef.current) {
+        setNavHeight(navRef.current.offsetHeight)
+      }
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [])
 
   useEffect(() => {
     const supabase = createClient()
@@ -45,7 +59,10 @@ export default function Navbar() {
   return (
     <>
       {/* ── Navbar bar ── */}
-      <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-[#020308]/90 backdrop-blur-md border-b border-white/5">
+      <nav
+        ref={navRef}
+        className="fixed top-0 left-0 right-0 w-full z-[100] bg-[#020308]/95 backdrop-blur-md border-b border-white/5"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
 
@@ -53,12 +70,12 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="text-lg sm:text-xl font-serif tracking-[0.2em] text-white uppercase"
+              className="flex-shrink-0 text-lg sm:text-xl font-serif tracking-[0.2em] text-white uppercase"
             >
               Aria Shadow<span className="text-[var(--glow-cyan)] font-sans">.</span>
             </Link>
 
-            {/* Desktop links */}
+            {/* Desktop Nav Links */}
             <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href
@@ -84,27 +101,37 @@ export default function Navbar() {
 
               {user ? (
                 <div className="pl-4 border-l border-white/5 flex items-center gap-5">
-                  <Link href="/admin" className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all">
+                  <Link
+                    href="/admin"
+                    className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all"
+                  >
                     Dashboard
                   </Link>
-                  <button onClick={handleLogout} className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer">
+                  <button
+                    onClick={handleLogout}
+                    className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                  >
                     Logout
                   </button>
                 </div>
               ) : (
                 <div className="pl-4 border-l border-white/5">
-                  <Link href="/login" className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-[10px] uppercase tracking-[0.2em] transition-all">
+                  <Link
+                    href="/login"
+                    className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-[10px] uppercase tracking-[0.2em] transition-all"
+                  >
                     Login
                   </Link>
                 </div>
               )}
             </div>
 
-            {/* Mobile hamburger */}
+            {/* Mobile hamburger button */}
             <button
-              className="md:hidden flex items-center justify-center w-11 h-11 text-zinc-300 hover:text-[var(--glow-cyan)] transition-colors"
+              className="md:hidden flex items-center justify-center w-11 h-11 text-zinc-300 hover:text-[var(--glow-cyan)] transition-colors cursor-pointer"
               onClick={() => setIsOpen(prev => !prev)}
-              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={isOpen}
             >
               {isOpen
                 ? <X size={22} strokeWidth={1.5} />
@@ -115,28 +142,41 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile menu — rendered OUTSIDE the nav, as a separate fixed panel ── */}
-      {/* Using a plain div with inline style so no CSS class issues can hide it */}
+      {/* ── Mobile Menu Panel ──
+          Rendered as a sibling to <nav>, NOT inside it.
+          Uses inline styles exclusively to avoid any Tailwind/CSS cascade issues.
+          z-index: 9999 ensures it's above everything including fixed elements.
+          top is set dynamically to match the actual navbar offsetHeight.
+      ── */}
       {isOpen && (
         <div
           style={{
-            position: 'fixed',
-            top: '64px',   /* matches h-16 */
+            position: "fixed",
+            top: navHeight,
             left: 0,
             right: 0,
             bottom: 0,
             zIndex: 9999,
-            backgroundColor: 'rgba(2, 3, 8, 0.98)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            overflowY: 'auto',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
+            backgroundColor: "rgba(2, 3, 8, 0.97)",
+            overflowY: "auto",
+            overflowX: "hidden",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '32px 24px 48px' }}>
-
-            {/* Nav links */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              padding: "24px 20px 40px",
+              maxWidth: "480px",
+              width: "100%",
+            }}
+          >
+            {/* Navigation Links */}
+            <nav style={{ display: "flex", flexDirection: "column" }}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href
                 return (
@@ -145,56 +185,66 @@ export default function Navbar() {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '18px 0',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
-                      fontFamily: 'var(--font-playfair), serif',
-                      fontSize: '18px',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "16px 0",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      fontSize: "17px",
                       fontWeight: 400,
-                      letterSpacing: '0.15em',
-                      textTransform: 'uppercase',
-                      textDecoration: 'none',
-                      color: isActive ? 'var(--glow-cyan)' : '#d4d4d8',
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      textDecoration: "none",
+                      color: isActive ? "#22d3ee" : "#d4d4d8",
+                      fontFamily: "serif",
                     }}
                   >
                     {link.name}
                     {isActive && (
-                      <span style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--glow-cyan)',
-                        display: 'inline-block',
-                        flexShrink: 0,
-                      }} />
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          backgroundColor: "#22d3ee",
+                          flexShrink: 0,
+                        }}
+                      />
                     )}
                   </Link>
                 )
               })}
-            </div>
+            </nav>
 
-            {/* Auth section */}
-            <div style={{ marginTop: 'auto', paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Auth Links */}
+            <div
+              style={{
+                marginTop: "auto",
+                paddingTop: "28px",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
               {user ? (
                 <>
                   <Link
                     href="/admin"
                     onClick={() => setIsOpen(false)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '16px',
-                      border: '1px solid rgba(34,211,238,0.3)',
-                      backgroundColor: 'rgba(34,211,238,0.05)',
-                      color: 'var(--glow-cyan)',
-                      fontSize: '13px',
-                      letterSpacing: '0.2em',
-                      textTransform: 'uppercase',
-                      textDecoration: 'none',
-                      fontFamily: 'var(--font-inter), sans-serif',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "15px",
+                      border: "1px solid rgba(34,211,238,0.3)",
+                      backgroundColor: "rgba(34,211,238,0.05)",
+                      color: "#22d3ee",
+                      fontSize: "12px",
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      textDecoration: "none",
+                      fontFamily: "sans-serif",
                     }}
                   >
                     Dashboard
@@ -202,19 +252,19 @@ export default function Navbar() {
                   <button
                     onClick={handleLogout}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '16px',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      backgroundColor: 'transparent',
-                      color: '#a1a1aa',
-                      fontSize: '13px',
-                      letterSpacing: '0.2em',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      fontFamily: 'var(--font-inter), sans-serif',
-                      width: '100%',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "15px",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      backgroundColor: "transparent",
+                      color: "#a1a1aa",
+                      fontSize: "12px",
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      fontFamily: "sans-serif",
+                      width: "100%",
                     }}
                   >
                     Logout
@@ -225,18 +275,18 @@ export default function Navbar() {
                   href="/login"
                   onClick={() => setIsOpen(false)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                    color: '#ffffff',
-                    fontSize: '13px',
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    textDecoration: 'none',
-                    fontFamily: 'var(--font-inter), sans-serif',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "15px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    backgroundColor: "rgba(255,255,255,0.03)",
+                    color: "#ffffff",
+                    fontSize: "12px",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                    fontFamily: "sans-serif",
                   }}
                 >
                   Login

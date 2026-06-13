@@ -38,7 +38,7 @@ export default function LoginPage() {
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--glow-cyan)]/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-md w-full p-10 bg-[#050814]/80 border border-white/5 shadow-[0_0_50px_rgba(34,211,238,0.03)] backdrop-blur-sm">
+      <div className="relative z-10 max-w-md w-full p-6 sm:p-10 bg-[#050814]/80 border border-white/5 shadow-[0_0_50px_rgba(34,211,238,0.03)] backdrop-blur-sm">
         {/* Corner Accents */}
         <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-[var(--glow-cyan)]/30" />
         <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-[var(--glow-cyan)]/30" />

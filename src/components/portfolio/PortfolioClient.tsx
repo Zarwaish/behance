@@ -25,13 +25,13 @@ export default function PortfolioClient({ initialProjects }: { initialProjects: 
     <div className="space-y-10 sm:space-y-12">
       {/* Search & Filters Panel */}
       <div className="flex flex-col gap-5 border-b border-white/5 pb-8">
-        {/* Category Filters — horizontally scrollable on mobile */}
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-max sm:flex-wrap">
+        {/* Category Filters — horizontally scrollable on mobile, no scrollbar shown */}
+        <div className="category-scroll overflow-x-auto w-full">
+          <div className="flex items-center gap-2 sm:gap-3 pb-1" style={{ minWidth: 'max-content' }}>
             <button
               onClick={() => setFilter("All")}
               className={cn(
-                "px-3 sm:px-4 py-2 uppercase tracking-[0.15em] text-[10px] font-medium transition-all duration-300 border whitespace-nowrap min-h-[38px]",
+                "px-4 py-2.5 uppercase tracking-[0.15em] text-[10px] font-medium transition-all duration-300 border whitespace-nowrap min-h-[40px] min-w-[44px]",
                 filter === "All"
                   ? "border-[var(--glow-cyan)]/40 text-white bg-white/5"
                   : "border-white/5 text-zinc-500 hover:text-white hover:border-white/10"
@@ -44,7 +44,7 @@ export default function PortfolioClient({ initialProjects }: { initialProjects: 
                 key={category}
                 onClick={() => setFilter(category)}
                 className={cn(
-                  "px-3 sm:px-4 py-2 uppercase tracking-[0.15em] text-[10px] font-medium transition-all duration-300 border whitespace-nowrap min-h-[38px]",
+                  "px-4 py-2.5 uppercase tracking-[0.15em] text-[10px] font-medium transition-all duration-300 border whitespace-nowrap min-h-[40px] min-w-[44px]",
                   filter === category
                     ? "border-[var(--glow-cyan)]/40 text-white bg-white/5"
                     : "border-white/5 text-zinc-500 hover:text-white hover:border-white/10"
