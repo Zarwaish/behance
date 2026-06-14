@@ -71,16 +71,30 @@ export async function updateAdminAccount(formData: {
 
     // 2. Update Email if changed
     if (formData.email && formData.email.toLowerCase() !== user.email?.toLowerCase()) {
-      const { error: emailError } = await supabase.auth.updateUser({
+      const { data: updateData, error: emailError } = await supabase.auth.updateUser({
         email: formData.email
       })
       if (emailError) return { success: false, error: emailError.message }
 
-      // Update admin_roles record too
-      await supabase
+      // Check if email updated instantly (email confirmation disabled) or if verification is sent
+      const isConfirmed = updateData.user?.email?.toLowerCase() === formData.email.toLowerCase()
+      
+      // Update admin_roles record immediately to prevent lockout
+      const { error: roleError } = await supabase
         .from("admin_roles")
-        .update({ email: formData.email })
+        .update({ email: formData.email.toLowerCase() })
         .eq("id", user.id)
+
+      if (roleError) {
+        return { success: false, error: `Auth updated but admin roles sync failed: ${roleError.message}` }
+      }
+
+      if (!isConfirmed) {
+        return { 
+          success: true, 
+          info: "A verification link has been sent to your new email. Please confirm it to complete the update." 
+        }
+      }
     }
 
     // 3. Update Password if specified

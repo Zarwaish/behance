@@ -36,7 +36,11 @@ export default function AdminAccountForm({ initialEmail }: { initialEmail: strin
     })
 
     if (res.success) {
-      setMessage({ text: "Admin credentials updated successfully.", type: "success" })
+      if ((res as any).info) {
+        setMessage({ text: (res as any).info, type: "success" })
+      } else {
+        setMessage({ text: "Admin credentials updated successfully.", type: "success" })
+      }
       setCurrentPassword("")
       setPassword("")
       setConfirmPassword("")
