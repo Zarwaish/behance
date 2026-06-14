@@ -5,7 +5,10 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-export default function SignupPage() {
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
+
+function SignupContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -13,6 +16,7 @@ export default function SignupPage() {
   const [success, setSuccess] = useState<boolean>(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,8 +46,9 @@ export default function SignupPage() {
     } else {
       setSuccess(true)
       setLoading(false)
+      const redirectUrl = searchParams.get("redirect")
       setTimeout(() => {
-        router.push("/login")
+        router.push(redirectUrl ? `/login?redirect=${redirectUrl}` : "/login")
       }, 4000)
     }
   }
@@ -118,11 +123,23 @@ export default function SignupPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <Link href="/login" className="text-[10px] uppercase tracking-[0.2em] text-zinc-555 hover:text-[var(--glow-cyan)] transition-colors">
+          <Link href={searchParams.get("redirect") ? `/login?redirect=${searchParams.get("redirect")}` : "/login"} className="text-[10px] uppercase tracking-[0.2em] text-zinc-555 hover:text-[var(--glow-cyan)] transition-colors">
             Already registered? Sign In
           </Link>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[75vh] flex items-center justify-center">
+        <span className="text-xs uppercase tracking-[0.2em] text-zinc-550 animate-pulse">Initializing Decryption Node...</span>
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
   )
 }

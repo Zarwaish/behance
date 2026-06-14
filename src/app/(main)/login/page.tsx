@@ -3,14 +3,18 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function LoginPage() {
+import { Suspense } from "react"
+
+function LoginContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +32,8 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push("/")
+      const redirectUrl = searchParams.get("redirect") || "/"
+      router.push(redirectUrl)
       router.refresh()
     }
   }
@@ -87,11 +92,23 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <Link href="/signup" className="text-[10px] uppercase tracking-[0.2em] text-zinc-550 hover:text-[var(--glow-cyan)] transition-colors">
+          <Link href="/signup" className="text-[10px] uppercase tracking-[0.2em] text-zinc-555 hover:text-[var(--glow-cyan)] transition-colors">
             New agent? Register credentials
           </Link>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[75vh] flex items-center justify-center">
+        <span className="text-xs uppercase tracking-[0.2em] text-zinc-550 animate-pulse">Initializing Decryption Node...</span>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }
