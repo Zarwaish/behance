@@ -74,25 +74,30 @@ export async function updateAdminAccount(formData: {
       const { data: updateData, error: emailError } = await supabase.auth.updateUser({
         email: formData.email
       })
-      if (emailError) return { success: false, error: emailError.message }
+      if (emailError) {
+        return { success: false, error: `Supabase Auth error: ${emailError.message}` }
+      }
 
       // Check if email updated instantly (email confirmation disabled) or if verification is sent
       const isConfirmed = updateData.user?.email?.toLowerCase() === formData.email.toLowerCase()
       
-      // Update admin_roles record immediately to prevent lockout
-      const { error: roleError } = await supabase
-        .from("admin_roles")
-        .update({ email: formData.email.toLowerCase() })
-        .eq("id", user.id)
+      if (isConfirmed) {
+        // Update admin_roles record immediately only if fully confirmed
+        const { error: roleError } = await supabase
+          .from("admin_roles")
+          .update({ email: formData.email.toLowerCase() })
+          .eq("id", user.id)
 
-      if (roleError) {
-        return { success: false, error: `Auth updated but admin roles sync failed: ${roleError.message}` }
-      }
-
-      if (!isConfirmed) {
+        if (roleError) {
+          return { success: false, error: `Auth updated but admin roles sync failed: ${roleError.message}` }
+        }
+      } else {
+        // If not confirmed (unconfirmed_email is set in user data, or email is still the old one)
+        // Do NOT update admin_roles yet since the user's active email hasn't changed.
+        // Alert the user that they must verify the new email first.
         return { 
           success: true, 
-          info: "A verification link has been sent to your new email. Please confirm it to complete the update." 
+          info: "A verification link has been sent to your new email. The change will take effect only after you click the verification link. The current active email remains unchanged." 
         }
       }
     }
