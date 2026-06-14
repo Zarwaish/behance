@@ -6,6 +6,7 @@ import { Save, AlertCircle, ShieldAlert } from "lucide-react"
 
 export default function AdminAccountForm({ initialEmail }: { initialEmail: string }) {
   const [email, setEmail] = useState(initialEmail)
+  const [currentPassword, setCurrentPassword] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [saving, setSaving] = useState(false)
@@ -16,6 +17,12 @@ export default function AdminAccountForm({ initialEmail }: { initialEmail: strin
     setSaving(true)
     setMessage(null)
 
+    if (!currentPassword) {
+      setMessage({ text: "Current password is required to verify identity.", type: "error" })
+      setSaving(false)
+      return
+    }
+
     if (password && password !== confirmPassword) {
       setMessage({ text: "Passwords do not match.", type: "error" })
       setSaving(false)
@@ -24,11 +31,13 @@ export default function AdminAccountForm({ initialEmail }: { initialEmail: strin
 
     const res = await updateAdminAccount({
       email,
+      currentPassword,
       newPassword: password || undefined
     })
 
     if (res.success) {
       setMessage({ text: "Admin credentials updated successfully.", type: "success" })
+      setCurrentPassword("")
       setPassword("")
       setConfirmPassword("")
     } else {
@@ -68,6 +77,18 @@ export default function AdminAccountForm({ initialEmail }: { initialEmail: strin
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full bg-[#02040a] border border-white/10 text-white px-4 py-3 text-xs focus:outline-none focus:border-red-500/50 rounded-none h-11"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-[10px] uppercase tracking-[0.2em] text-red-400">Current Password (Required for verification)</label>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+            placeholder="••••••••••••"
             className="w-full bg-[#02040a] border border-white/10 text-white px-4 py-3 text-xs focus:outline-none focus:border-red-500/50 rounded-none h-11"
           />
         </div>

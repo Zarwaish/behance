@@ -40,11 +40,16 @@ export async function updateSettings(contactEmail: string) {
 
 export async function updateAdminAccount(formData: {
   email: string
+  currentPassword?: string
   newPassword?: string
 }) {
   const isAdmin = await isCurrentUserAdmin()
   if (!isAdmin) {
     return { success: false, error: "Unauthorized operation." }
+  }
+
+  if (!formData.currentPassword) {
+    return { success: false, error: "Current password is required to make updates." }
   }
 
   const supabase = await createClient()
@@ -54,7 +59,17 @@ export async function updateAdminAccount(formData: {
       return { success: false, error: "Authenticated session not found." }
     }
 
-    // 1. Update Email if changed
+    // 1. Re-authenticate admin with current password first
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email || "",
+      password: formData.currentPassword,
+    })
+
+    if (authError) {
+      return { success: false, error: "Authentication failed. Current password is incorrect." }
+    }
+
+    // 2. Update Email if changed
     if (formData.email && formData.email.toLowerCase() !== user.email?.toLowerCase()) {
       const { error: emailError } = await supabase.auth.updateUser({
         email: formData.email
@@ -68,7 +83,7 @@ export async function updateAdminAccount(formData: {
         .eq("id", user.id)
     }
 
-    // 2. Update Password if specified
+    // 3. Update Password if specified
     if (formData.newPassword) {
       const { error: passwordError } = await supabase.auth.updateUser({
         password: formData.newPassword
