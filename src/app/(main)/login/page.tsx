@@ -33,8 +33,7 @@ function LoginContent() {
       setLoading(false)
     } else {
       const redirectUrl = searchParams.get("redirect") || "/"
-      router.push(redirectUrl)
-      router.refresh()
+      window.location.href = redirectUrl
     }
   }
 
