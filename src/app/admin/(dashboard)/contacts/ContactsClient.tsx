@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { updateContactStatus, deleteContactRequest } from "./actions"
-import { Trash2, Mail, ExternalLink, Search, Filter, AlertTriangle, X } from "lucide-react"
+import { updateContactStatus, deleteContactRequest, sendAdminReply } from "./actions"
+import { Trash2, Mail, ExternalLink, Search, Filter, AlertTriangle, X, Send } from "lucide-react"
 
 type Status = "new" | "replied" | "closed"
 
@@ -36,6 +36,12 @@ export default function ContactsClient({ requests }: { requests: ContactRequest[
   const [deleteTarget, setDeleteTarget] = useState<ContactRequest | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  // Composer Modal state
+  const [replyTarget, setReplyTarget] = useState<ContactRequest | null>(null)
+  const [replySubject, setReplySubject] = useState("")
+  const [replyMessage, setReplyMessage] = useState("")
+  const [sendingReply, setSendingReply] = useState(false)
+
   const handleStatusChange = (id: string, status: Status) => {
     setUpdating(id)
     startTransition(async () => {
@@ -60,8 +66,44 @@ export default function ContactsClient({ requests }: { requests: ContactRequest[
     setDeleting(false)
   }
 
-  const handleReplyMailto = (req: ContactRequest) => {
-    // Generate Professional template
+  const handleInitiateReply = (req: ContactRequest) => {
+    setReplyTarget(req)
+    setReplySubject(`Re: Inquiry on project: "${req.project_title || 'Artwork Inquiry'}"`)
+    setReplyMessage(
+      `Hi ${req.name},\n\n` +
+      `Thank you for reaching out regarding "${req.project_title || 'my creative portfolio work'}". I have received your message:\n\n` +
+      `"${req.message}"\n\n` +
+      `I would love to discuss this further. Let me know when you are available to connect.\n\n` +
+      `Best regards,\n` +
+      `Aria Shadow`
+    )
+  }
+
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!replyTarget) return
+    setSendingReply(true)
+    
+    const res = await sendAdminReply({
+      inquiryId: replyTarget.id,
+      toEmail: replyTarget.email,
+      subject: replySubject,
+      message: replyMessage
+    })
+
+    if (res.success) {
+      // Update local state status to Replied
+      setLocalRequests(prev => 
+        prev.map(r => r.id === replyTarget.id ? { ...r, status: "replied" as Status } : r)
+      )
+      setReplyTarget(null)
+    } else {
+      alert(res.error || "Failed to transmit reply email.")
+    }
+    setSendingReply(false)
+  }
+
+  const handleOpenGmail = (req: ContactRequest) => {
     const subject = encodeURIComponent(`Re: Inquiry on project: "${req.project_title || 'Artwork Inquiry'}"`)
     const body = encodeURIComponent(
       `Hi ${req.name},\n\n` +
@@ -71,14 +113,15 @@ export default function ContactsClient({ requests }: { requests: ContactRequest[
       `Best regards,\n` +
       `Aria Shadow`
     )
-    
-    // Automatically transition state to Replied
+
+    // Mark status as replied locally
     if (req.status === "new") {
       handleStatusChange(req.id, "replied")
     }
 
-    // Open mail client
-    window.location.href = `mailto:${req.email}?subject=${subject}&body=${body}`
+    // Open Gmail composer in a new tab
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(req.email)}&su=${subject}&body=${body}`
+    window.open(gmailUrl, "_blank")
   }
 
   // Filtered requests list
@@ -230,15 +273,22 @@ export default function ContactsClient({ requests }: { requests: ContactRequest[
                 {/* Response / Action buttons */}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleReplyMailto(req)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-450 text-[9px] uppercase tracking-wider hover:bg-emerald-500/20 transition-all cursor-pointer rounded-none h-8"
+                    onClick={() => handleInitiateReply(req)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-450 text-[9px] uppercase tracking-wider hover:bg-emerald-500/20 transition-all cursor-pointer rounded-none h-8 font-medium"
                   >
                     <Mail className="w-3 h-3" />
-                    <span>Reply via Email</span>
+                    <span>Reply</span>
+                  </button>
+                  <button
+                    onClick={() => handleOpenGmail(req)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-zinc-400 text-[9px] uppercase tracking-wider hover:border-white/20 transition-all cursor-pointer rounded-none h-8 font-medium"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>Open in Gmail</span>
                   </button>
                   <button
                     onClick={() => setDeleteTarget(req)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-450 text-[9px] uppercase tracking-wider hover:bg-red-500/20 transition-all cursor-pointer rounded-none h-8"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-450 text-[9px] uppercase tracking-wider hover:bg-red-500/20 transition-all cursor-pointer rounded-none h-8 font-medium"
                   >
                     <Trash2 className="w-3 h-3" />
                     <span>Delete</span>
@@ -247,6 +297,78 @@ export default function ContactsClient({ requests }: { requests: ContactRequest[
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Reply Composer Modal Overlay */}
+      {replyTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <form onSubmit={handleSendReply} className="relative max-w-lg w-full p-6 sm:p-8 bg-[#050814] border border-[var(--glow-cyan)]/25 shadow-2xl space-y-4">
+            <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[var(--glow-cyan)]/50" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[var(--glow-cyan)]/50" />
+
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <h3 className="text-xs font-serif uppercase tracking-[0.2em] font-semibold text-white">Compose Response</h3>
+              <button 
+                type="button" 
+                onClick={() => setReplyTarget(null)} 
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1">Recipient</label>
+              <input 
+                type="text" 
+                value={replyTarget.email} 
+                disabled 
+                className="w-full px-3 py-2 bg-white/5 border border-white/5 text-zinc-500 text-xs cursor-not-allowed rounded-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1">Subject</label>
+              <input 
+                type="text" 
+                value={replySubject} 
+                onChange={(e) => setReplySubject(e.target.value)} 
+                required
+                className="w-full px-3 py-2 bg-[#02040a]/40 border border-white/10 text-white focus:outline-none focus:border-[var(--glow-cyan)]/40 transition-colors text-xs rounded-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1">Message Body</label>
+              <textarea 
+                value={replyMessage} 
+                onChange={(e) => setReplyMessage(e.target.value)} 
+                required
+                rows={8}
+                className="w-full px-3 py-2 bg-[#02040a]/40 border border-white/10 text-white focus:outline-none focus:border-[var(--glow-cyan)]/40 transition-colors text-xs rounded-none resize-none leading-relaxed"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={sendingReply}
+                onClick={() => setReplyTarget(null)}
+                className="px-4 py-2 border border-white/10 text-zinc-400 hover:text-white text-[10px] uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={sendingReply}
+                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-450 hover:bg-emerald-500/20 text-[10px] uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-40"
+              >
+                <Send className="w-3 h-3" />
+                <span>{sendingReply ? "Transmitting..." : "Send Response"}</span>
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
