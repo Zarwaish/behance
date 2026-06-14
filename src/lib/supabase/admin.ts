@@ -17,7 +17,10 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     }
 
     // Default admin email hardcoded check as fallback
-    if (user.email && user.email.toLowerCase() === "aria.shadow@example.com") {
+    if (user.email && (
+      user.email.toLowerCase() === "admin321@gmail.com" ||
+      user.email.toLowerCase() === "aria.shadow@example.com"
+    )) {
       return true
     }
 
