@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import CelestialBackground from "@/components/layout/CelestialBackground";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -26,10 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans bg-background text-foreground antialiased selection:bg-cyan-500/30 selection:text-white`}>
-        <CelestialBackground />
-        {children}
+        <ThemeProvider>
+          <CelestialBackground />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

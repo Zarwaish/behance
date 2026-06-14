@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -5,6 +6,91 @@
   --foreground: #e2e8f0;
   --glow-cyan: #22d3ee;
   --glow-blue: #3b82f6;
+  --card-bg: rgba(5, 8, 20, 0.8);
+  --border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Light Theme Configuration ── */
+.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --glow-cyan: #0891b2;
+  --glow-blue: #2563eb;
+  --card-bg: #ffffff;
+  --border-color: rgba(15, 23, 42, 0.08);
+}
+
+.light body {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Override dark/black backgrounds in light mode */
+.light [class*="bg-[#020"],
+.light [class*="bg-[#050"],
+.light [class*="bg-background"],
+.light [class*="bg-black"],
+.light [class*="bg-[#020308]"] {
+  background-color: var(--card-bg) !important;
+}
+
+/* Specific section overrides */
+.light section {
+  background-color: #f8fafc !important;
+  border-color: var(--border-color) !important;
+}
+
+.light nav, .light header {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Mobile nav menu overrides in light mode */
+.light [style*="rgba(2, 3, 8"] {
+  background-color: rgba(248, 250, 252, 0.98) !important;
+  border-top-color: rgba(15, 23, 42, 0.08) !important;
+}
+.light [style*="borderBottom"] {
+  border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+.light [style*="borderTop"] {
+  border-top-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Text colors overrides */
+.light .text-white,
+.light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+  color: #0f172a !important;
+}
+
+.light .text-zinc-400,
+.light .text-zinc-500,
+.light .text-zinc-350,
+.light .text-zinc-600 {
+  color: #475569 !important; /* slate-600 */
+}
+
+/* Border overrides */
+.light [class*="border-white"] {
+  border-color: var(--border-color) !important;
+}
+
+/* Form fields overrides */
+.light input, .light textarea, .light select {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+.light input:focus, .light textarea:focus, .light select:focus {
+  border-color: var(--glow-cyan) !important;
+}
+
+/* ── Typography class ── */
+.font-akira {
+  font-family: 'Syncopate', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 @theme inline {
@@ -20,36 +106,27 @@
 }
 
 html {
-  /* Smooth scroll for anchor links */
   scroll-behavior: smooth;
-  /* NOTE: Do NOT add overflow-x:hidden here — it clips position:fixed elements
-     on iOS Safari (e.g. mobile nav menu). Use body overflow instead. */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Prevent horizontal scroll on mobile */
   overflow-x: hidden;
-  /* Better text rendering on mobile */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Prevent text size adjustment on iOS */
   -webkit-text-size-adjust: 100%;
 }
 
-/* ── Images & media — never overflow their container ── */
 img, video, iframe, svg {
   max-width: 100%;
   height: auto;
 }
 
-/* ── Touch: remove tap highlight on interactive elements ── */
 a, button, label, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Custom scrollbar (desktop only) ── */
 @media (min-width: 768px) {
   ::-webkit-scrollbar {
     width: 6px;
@@ -66,7 +143,6 @@ a, button, label, [role="button"] {
   }
 }
 
-/* ── Float sparkle animation ── */
 @keyframes float-sparkle {
   0%   { transform: translateY(0) scale(1); opacity: 0; }
   20%  { opacity: 0.8; }
@@ -78,8 +154,6 @@ a, button, label, [role="button"] {
   animation: float-sparkle linear infinite;
 }
 
-/* ── Mobile: Category filter scroll ──
-   Ensures category pill row scrolls horizontally without showing scrollbar */
 .category-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;

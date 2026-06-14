@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Sun, Moon } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
+import { useTheme } from "@/components/theme/ThemeProvider"
+import { checkAdminStatus } from "@/app/admin/(dashboard)/homepage/actions"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -19,6 +21,8 @@ export default function Navbar() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
+  const { theme, toggleTheme } = useTheme()
   const navRef = useRef<HTMLElement>(null)
   const [navHeight, setNavHeight] = useState(64)
 
@@ -36,9 +40,22 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      if (user) {
+        checkAdminStatus().then(status => setIsAdmin(status))
+      } else {
+        setIsAdmin(false)
+      }
+    })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null)
+      const activeUser = session?.user || null
+      setUser(activeUser)
+      if (activeUser) {
+        checkAdminStatus().then(status => setIsAdmin(status))
+      } else {
+        setIsAdmin(false)
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -99,17 +116,28 @@ export default function Navbar() {
                 )
               })}
 
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-zinc-400 hover:text-[var(--glow-cyan)] transition-colors cursor-pointer flex items-center justify-center min-w-[40px] min-h-[40px]"
+                aria-label="Toggle Theme"
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
               {user ? (
                 <div className="pl-4 border-l border-white/5 flex items-center gap-5">
-                  <Link
-                    href="/admin"
-                    className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all"
-                  >
-                    Dashboard
-                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/45 bg-[var(--glow-cyan)]/5 text-white text-[10px] uppercase tracking-[0.2em] transition-all min-h-[36px] flex items-center"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
-                    className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                    className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-red-400 transition-colors cursor-pointer min-h-[36px]"
                   >
                     Logout
                   </button>
@@ -118,7 +146,7 @@ export default function Navbar() {
                 <div className="pl-4 border-l border-white/5">
                   <Link
                     href="/login"
-                    className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-[10px] uppercase tracking-[0.2em] transition-all"
+                    className="px-5 py-2 border border-white/10 hover:border-[var(--glow-cyan)]/40 text-white text-[10px] uppercase tracking-[0.2em] transition-all min-h-[36px] flex items-center"
                   >
                     Login
                   </Link>
@@ -227,28 +255,54 @@ export default function Navbar() {
                 gap: "12px",
               }}
             >
+              {/* Mobile Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "15px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  backgroundColor: "transparent",
+                  color: "#d4d4d8",
+                  fontSize: "12px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  fontFamily: "sans-serif",
+                  width: "100%",
+                  gap: "10px"
+                }}
+              >
+                {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                <span>Toggle {theme === "dark" ? "Light" : "Dark"} Mode</span>
+              </button>
+
               {user ? (
                 <>
-                  <Link
-                    href="/admin"
-                    onClick={() => setIsOpen(false)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "15px",
-                      border: "1px solid rgba(34,211,238,0.3)",
-                      backgroundColor: "rgba(34,211,238,0.05)",
-                      color: "#22d3ee",
-                      fontSize: "12px",
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      textDecoration: "none",
-                      fontFamily: "sans-serif",
-                    }}
-                  >
-                    Dashboard
-                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "15px",
+                        border: "1px solid rgba(34,211,238,0.3)",
+                        backgroundColor: "rgba(34,211,238,0.05)",
+                        color: "#22d3ee",
+                        fontSize: "12px",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        textDecoration: "none",
+                        fontFamily: "sans-serif",
+                      }}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     style={{

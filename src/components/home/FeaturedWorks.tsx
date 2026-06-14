@@ -21,7 +21,7 @@ export default function FeaturedWorks({ projects }: { projects: Project[] }) {
             transition={{ duration: 1 }}
           >
             <h2 className="text-xs text-[var(--glow-cyan)] uppercase tracking-[0.4em] mb-2 sm:mb-3">Featured Showcases</h2>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-widest uppercase">Curated Catalog</h3>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-akira text-white">Curated Catalog</h3>
           </motion.div>
 
           <motion.div

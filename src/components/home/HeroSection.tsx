@@ -56,7 +56,7 @@ export default function HeroSection({ project }: { project?: any }) {
               transition={{ duration: 0.8 }}
               className="space-y-3 sm:space-y-4"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif tracking-widest text-white uppercase leading-tight line-clamp-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-akira text-white leading-tight line-clamp-2">
                 {title}
               </h1>
               <p className="text-[10px] sm:text-xs text-[var(--glow-cyan)] uppercase tracking-[0.3em] font-medium">

@@ -28,7 +28,7 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push("/admin")
+      router.push("/")
       router.refresh()
     }
   }
@@ -46,8 +46,8 @@ export default function LoginPage() {
         <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-[var(--glow-cyan)]/30" />
 
         <div className="text-center mb-10">
-          <h1 className="text-2xl font-serif text-white mb-2 tracking-widest uppercase">Vault Login</h1>
-          <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em]">Authorized Personnel Only</p>
+          <h1 className="text-2xl font-serif text-white mb-2 tracking-widest uppercase">Sign In</h1>
+          <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em]">Access your creative session</p>
         </div>
 
         {error && (
@@ -82,7 +82,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-4 mt-4 border border-[var(--glow-cyan)]/50 text-[var(--glow-cyan)] uppercase tracking-[0.2em] text-xs font-medium hover:bg-[var(--glow-cyan)]/10 transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {loading ? "Authenticating..." : "Breach Vault"}
+            {loading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
 

@@ -75,6 +75,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+  const isAdminLoginRoute = request.nextUrl.pathname === '/admin/login'
   const isAuthRoute =
     request.nextUrl.pathname === '/login' ||
     request.nextUrl.pathname === '/signup'
@@ -83,15 +84,15 @@ export async function updateSession(request: NextRequest) {
     request.cookies.get('bypass_auth')?.value === 'true' ||
     request.headers.get('x-bypass-auth') === 'true'
 
-  if (isAdminRoute && !user && !bypassAuth) {
+  if (isAdminRoute && !isAdminLoginRoute && !user && !bypassAuth) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/login'
+    redirectUrl.pathname = '/admin/login'
     return NextResponse.redirect(redirectUrl)
   }
 
   if (isAuthRoute && (user || bypassAuth)) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/admin'
+    redirectUrl.pathname = '/'
     return NextResponse.redirect(redirectUrl)
   }
 

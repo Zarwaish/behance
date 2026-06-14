@@ -59,3 +59,8 @@ export async function updateHomepageSettings(
     return { success: false, error: err.message || "An unexpected error occurred" }
   }
 }
+
+export async function checkAdminStatus(): Promise<boolean> {
+  const { isCurrentUserAdmin } = await import("@/lib/supabase/admin")
+  return await isCurrentUserAdmin()
+}

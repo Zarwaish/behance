@@ -28,7 +28,7 @@ export default function FeaturedShowcase({ project }: { project?: any }) {
         {/* Section header */}
         <div className="mb-10 sm:mb-16">
           <h2 className="text-xs text-[var(--glow-cyan)] uppercase tracking-[0.4em] mb-2 sm:mb-3">Masterpiece Spotlight</h2>
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-widest uppercase">Featured Artwork</h3>
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-akira text-white">Featured Artwork</h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">

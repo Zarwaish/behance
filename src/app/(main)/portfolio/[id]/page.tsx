@@ -4,10 +4,17 @@ import Link from "next/link"
 import { ArrowLeft, ExternalLink, Globe, Calendar, User, Cpu } from "lucide-react"
 import { notFound } from "next/navigation"
 import { Project } from "@/types"
+import ContactArtistForm from "@/components/portfolio/ContactArtistForm"
 
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (e) {}
 
   let projectData = null;
   try {
@@ -213,6 +220,48 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Contact Artist Section */}
+          <div className="mt-12 sm:mt-16 border-t border-white/5 pt-10 sm:pt-14">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xs text-[var(--glow-cyan)] uppercase tracking-[0.4em] mb-2">Artist Contact</h2>
+              <h3 className="text-xl sm:text-2xl font-akira text-white">Contact the Artist</h3>
+            </div>
+
+            {user ? (
+              <div className="max-w-2xl">
+                <ContactArtistForm
+                  projectId={project.id}
+                  projectTitle={project.title}
+                  userEmail={user.email || ""}
+                />
+              </div>
+            ) : (
+              <div className="max-w-2xl bg-[#050814]/40 border border-white/5 p-8 relative">
+                <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[var(--glow-cyan)]/25" />
+                <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[var(--glow-cyan)]/25" />
+                <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[var(--glow-cyan)]/25" />
+                <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[var(--glow-cyan)]/25" />
+                <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+                  Please sign in to your account to send the artist a direct inquiry about this creation.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href={`/login?redirect=/portfolio/${id}`}
+                    className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent border border-[var(--glow-cyan)]/40 text-[var(--glow-cyan)] text-[10px] uppercase tracking-[0.2em] transition-all hover:border-[var(--glow-cyan)]/70 min-h-[44px]"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href={`/signup?redirect=/portfolio/${id}`}
+                    className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent border border-white/20 text-white text-[10px] uppercase tracking-[0.2em] transition-all hover:border-white/40 min-h-[44px]"
+                  >
+                    Create Account
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
