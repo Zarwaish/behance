@@ -23,7 +23,7 @@ function LoginContent() {
 
     const supabase = createClient()
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: loginData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -32,6 +32,25 @@ function LoginContent() {
       setError(error.message)
       setLoading(false)
     } else {
+      const user = loginData.user
+      if (user) {
+        // Query database to check if this email/user ID is an admin
+        const { data: dbAdmin } = await supabase
+          .from("admin_roles")
+          .select("role")
+          .eq("id", user.id)
+          .eq("role", "admin")
+          .maybeSingle()
+
+        if (dbAdmin) {
+          // Deny login, sign out immediately, generic error message
+          await supabase.auth.signOut()
+          setError("Invalid login credentials.")
+          setLoading(false)
+          return
+        }
+      }
+
       const redirectUrl = searchParams.get("redirect") || "/"
       window.location.href = redirectUrl
     }

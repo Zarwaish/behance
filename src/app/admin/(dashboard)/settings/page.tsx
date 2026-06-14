@@ -1,8 +1,11 @@
 import { getSettings } from "./actions"
+import { getCurrentAdminEmail } from "./admin-actions"
 import SettingsForm from "./SettingsForm"
+import AdminAccountForm from "./AdminAccountForm"
 
 export default async function SettingsPage() {
   const settings = await getSettings()
+  const adminEmail = await getCurrentAdminEmail()
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -12,6 +15,8 @@ export default async function SettingsPage() {
       </div>
 
       <SettingsForm initialEmail={settings.contact_email} />
+      
+      <AdminAccountForm initialEmail={adminEmail} />
     </div>
   )
 }

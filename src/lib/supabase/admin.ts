@@ -9,37 +9,20 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
       return false
     }
 
-    // Check env var fallback first (emails separated by comma)
-    const adminEmailsEnv = process.env.ADMIN_EMAILS || ""
-    const adminEmails = adminEmailsEnv.split(",").map(e => e.trim().toLowerCase())
-    if (user.email && adminEmails.includes(user.email.toLowerCase())) {
-      return true
-    }
-
-    // Default admin email hardcoded check as fallback
-    if (user.email && (
-      user.email.toLowerCase() === "admin321@gmail.com" ||
-      user.email.toLowerCase() === "aria.shadow@example.com"
-    )) {
-      return true
-    }
-
-    // Query admin_users database table
-    const { data: adminRecord, error: dbError } = await supabase
-      .from("admin_users")
-      .select("id")
+    // Query admin_roles database table as single source of truth
+    const { data: roleRecord, error: dbError } = await supabase
+      .from("admin_roles")
+      .select("role")
       .eq("id", user.id)
+      .eq("role", "admin")
       .maybeSingle()
 
     if (dbError) {
-      console.warn("Could not query admin_users table (might not exist yet):", dbError.message)
+      console.error("Database query failed inside isCurrentUserAdmin helper:", dbError.message)
+      return false
     }
 
-    if (adminRecord) {
-      return true
-    }
-
-    return false
+    return !!roleRecord
   } catch (err) {
     console.error("Exception checking admin user permissions:", err)
     return false

@@ -38,36 +38,17 @@ export default function AdminLoginPage() {
       return
     }
 
-    // Check if user is an admin
+    // Check if user is an admin in the database
     try {
-      // Check hardcoded env list or fallback
-      const adminEmailsEnv = process.env.NEXT_PUBLIC_ADMIN_EMAILS || ""
-      const adminEmails = adminEmailsEnv.split(",").map(e => e.trim().toLowerCase())
-      
-      let isAllowed = false
-      if (user.email && (
-        adminEmails.includes(user.email.toLowerCase()) || 
-        user.email.toLowerCase() === "admin321@gmail.com" ||
-        user.email.toLowerCase() === "aria.shadow@example.com"
-      )) {
-        isAllowed = true
-      }
+      const { data: dbRole } = await supabase
+        .from("admin_roles")
+        .select("role")
+        .eq("id", user.id)
+        .eq("role", "admin")
+        .maybeSingle()
 
-      if (!isAllowed) {
-        // Query database table to check if admin
-        const { data: dbAdmin } = await supabase
-          .from("admin_users")
-          .select("id")
-          .eq("id", user.id)
-          .maybeSingle()
-        
-        if (dbAdmin) {
-          isAllowed = true
-        }
-      }
-
-      if (!isAllowed) {
-        // Deny access: sign out user immediately so they don't stay logged in
+      if (!dbRole) {
+        // Deny access: sign out user immediately
         await supabase.auth.signOut()
         setError("Access Denied: This portal is reserved for authorized administrators only.")
         setLoading(false)
